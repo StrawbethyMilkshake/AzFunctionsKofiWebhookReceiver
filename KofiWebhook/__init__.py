@@ -63,19 +63,21 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     if data['shop_items'] is not None:
         if os.environ["SPLIT_SHOP_ITEM_RECORDS"] == '1':
+            import get_item_details
+            table_service.create_table('items')
             for item in data['shop_items']:
-                payment_entity.RowKey = f"{payment_id}+{item['direct_link_code']}+{item['variation_name']}"
-                payment_entity.DirectLinkCode = item['direct_link_code']
-                payment_entity.VariationName = item['variation_name']
-                payment_entity.Quantity = item['quantity']
-                table_service.insert_entity(table_name, payment_entity)
+                item_entity = Entity()
+                item_entity.PartitionKey = payment_id
+                item_entity.RowKey = f"{payment_id}+{item['direct_link_code']}+{item['variation_name']}"
+                item_entity.DirectLinkCode = item['direct_link_code']
+                item_entity.VariationName = item['variation_name']
+                item_entity.Quantity = item['quantity']
+                table_service.insert_entity('items', item_entity)
         else:
-            payment_entity.RowKey = payment_id
             payment_entity.Items = str(data['shop_items'])
-            table_service.insert_entity(table_name, payment_entity)
-    else:
-        payment_entity.RowKey = payment_id
-        table_service.insert_entity(table_name, payment_entity)
+
+    payment_entity.RowKey = payment_id
+    table_service.insert_entity(table_name, payment_entity)
 
     # Return a success response
     return func.HttpResponse(status_code=200)
