@@ -28,16 +28,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     payment_id = data['kofi_transaction_id']
 
     # Set the table name depending on the payment type
-    if payment_type == 'Donation':
-        table_name = 'donations'
-    elif payment_type == 'Subscription':
-        table_name = 'subscriptions'
-    elif payment_type == 'Commission':
-        table_name = 'commissions'
-    elif payment_type == 'Shop Order':
-        table_name = 'shoporders'
-    else:
-        return func.HttpResponse(status_code=400)
+    table_name = f"{(payment_type.replace(' ', '')).lower()}s"
 
     # Log the payment to the Azure Table Storage table
     table_service.create_table(table_name)
