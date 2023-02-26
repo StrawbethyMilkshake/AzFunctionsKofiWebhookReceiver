@@ -35,12 +35,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     elif payment_type == 'Commission':
         table_name = 'commissions'
     elif payment_type == 'Shop Order':
-        table_name = 'shop_orders'
+        table_name = 'shoporders'
     else:
         return func.HttpResponse(status_code=400)
 
     # Log the payment to the Azure Table Storage table
-    table_service.create_table(table_name.replace('_', ''))
+    table_service.create_table(table_name)
     payment_entity = Entity()
     payment_entity.PartitionKey = payment_currency
     payment_entity.paymentAmount = payment_amount
@@ -77,14 +77,14 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 payment_entity.DirectLinkCode = item['direct_link_code']
                 payment_entity.VariationName = item['variation_name']
                 payment_entity.Quantity = item['quantity']
-                table_service.insert_entity(table_name.replace('_', ''), payment_entity)
+                table_service.insert_entity(table_name, payment_entity)
         else:
             payment_entity.RowKey = payment_id
             payment_entity.Items = str(data['shop_items'])
-            table_service.insert_entity(table_name.replace('_', ''), payment_entity)
+            table_service.insert_entity(table_name, payment_entity)
     else:
         payment_entity.RowKey = payment_id
-        table_service.insert_entity(table_name.replace('_', ''), payment_entity)
+        table_service.insert_entity(table_name, payment_entity)
 
     # Return a success response
     return func.HttpResponse(status_code=200)
